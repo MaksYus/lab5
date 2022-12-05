@@ -1,8 +1,46 @@
 from pydantic import BaseModel
 from typing import Union, List
+import datetime
 
+# КА
+class KA(BaseModel):
+    """
+    Класс для отображения информации о покупателях/КА
+    """
+    id_KA: int
+    name: str
+    adress: str
+    phone_number: str
 
+# Мебель
+class FurnModel(BaseModel):
+    """
+    Класс описания модели мебели
+    """
+    furn_model_name: str
+    furn_model: str
+    characteristics: str
+    price: float
 
+# Договор
+class Doc_payment(BaseModel):
+    """
+    класс описания информации о договоре
+    """
+    doc_num: int
+    id_KA: int
+    date_create: datetime
+    date: datetime
+
+# продажа
+class payment(BaseModel):
+    """
+    информация о продажах
+    """
+    doc_num: int
+    furn_name: str
+    furn_model: str
+    amount: int
 
 class ItemBase(BaseModel):
     """

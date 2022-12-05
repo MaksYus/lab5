@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime
 from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
@@ -32,3 +32,43 @@ class Item(BaseModel):
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="items")
+
+class FurnitureModel(Base):
+    __tablename__ = "FurnitureModel"
+
+    furn_model = Column(String,index=True,primary_key=True)
+    furn_model_name = Column(String)
+    characteristics = Column(String)
+    price = Column(Float,nullable=False)
+    def __repr__(self):
+        return f"<{type(self).__name__}(id={self.furn_model})>"
+
+class KA(Base):
+    __tablename__ = "KA"
+
+    id_ka = Column(Integer,index=True,primary_key=True)
+    name = Column(String)
+    adress = Column(String)
+    phone = Column(String)
+    def __repr__(self):
+        return f"<{type(self).__name__}(id={self.id_ka})>"
+
+class Doc_payment(Base):
+    __tablename__ = "DocPayment"
+
+    doc_num = Column(String,index=True,primary_key=True)
+    id_KA = Column(Integer,ForeignKey("KA.id_ka"),nullable=False)
+    date_create = Column(DateTime)
+    date = Column(DateTime)
+    def __repr__(self):
+        return f"<{type(self).__name__}(id={self.doc_num})>"
+
+class Payment(Base):
+    __tablename__ = "Payment"
+
+    doc_num = Column(String,ForeignKey("DocPayment.doc_num"),nullable=False)
+    furn_model = Column(String,ForeignKey("FurnitureModel.furn_model"),nullable=False)
+    furn_name = Column(String)
+    amount = Column(Integer,nullable=False)
+    def __repr__(self):
+        return f"<{type(self).__name__}>"
