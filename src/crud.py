@@ -37,7 +37,8 @@ def create_furniture_model(db:Session,fm:schemas.FurnModel):
     """
     fur_model = models.FurnitureModel(furn_model = fm.furn_model, furn_model_name = fm.furn_model_name, 
     characteristics = fm.characteristics, price = fm.price)
-    return acr(db,fur_model)
+    fur_model = acr(db,fur_model)
+    return fur_model
 
 def create_doc_pay(db:Session,dp:schemas.Doc_payment):
     """
@@ -74,6 +75,12 @@ def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
     
 #     """
 #     return db.query().filter()
+
+def get_payment(db:Session,id_payment:int = 0):
+    """
+    получить оплату по её ид
+    """
+    return db.query(models.Payment).filter(models.Payment.id_payment == id_payment).first()
 
 def get_payments_by_doc_num(db:Session, doc_num:int = 0):
     """

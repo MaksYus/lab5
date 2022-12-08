@@ -29,14 +29,15 @@ class Doc_payment(BaseModel):
     """
     doc_num: int
     id_KA: int
-    date_create: datetime
-    date: datetime
+    date_create: datetime.datetime
+    date: datetime.datetime
 
 # продажа
 class payment(BaseModel):
     """
     информация о продажах
     """
+    id_payment: int
     doc_num: int
     furn_name: str
     furn_model: str

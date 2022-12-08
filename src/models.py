@@ -37,11 +37,11 @@ class FurnitureModel(Base):
     __tablename__ = "FurnitureModel"
 
     furn_model = Column(String,index=True,primary_key=True)
-    furn_model_name = Column(String)
+    furn_model_name = Column(String,unique=True)
     characteristics = Column(String)
     price = Column(Float,nullable=False)
-    def __repr__(self):
-        return f"<{type(self).__name__}(id={self.furn_model})>"
+    # def __repr__(self):
+    #     return f"<{type(self).__name__}(id={self.furn_model})>"
 
 class KA(Base):
     __tablename__ = "KA"
@@ -66,6 +66,7 @@ class Doc_payment(Base):
 class Payment(Base):
     __tablename__ = "Payment"
 
+    id_payment = Column(Integer,primary_key=True)
     doc_num = Column(String,ForeignKey("DocPayment.doc_num"),nullable=False)
     furn_model = Column(String,ForeignKey("FurnitureModel.furn_model"),nullable=False)
     furn_name = Column(String)
