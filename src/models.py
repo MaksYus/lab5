@@ -9,29 +9,27 @@ class BaseModel(Base):
     """
     __abstract__ = True
 
-    id = Column(Integer, primary_key=True, index=True)
-
     def __repr__(self):
         return f"<{type(self).__name__}(id={self.id})>"
 
-class User(BaseModel):
-    __tablename__ = "users"
+# class User(BaseModel):
+#     __tablename__ = "users"
 
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    is_active = Column(Boolean, default=True)
+#     email = Column(String, unique=True, index=True)
+#     hashed_password = Column(String)
+#     is_active = Column(Boolean, default=True)
 
-    items = relationship("Item", back_populates="owner")
+#     items = relationship("Item", back_populates="owner")
 
 
-class Item(BaseModel):
-    __tablename__ = "items"
+# class Item(BaseModel):
+#     __tablename__ = "items"
 
-    title = Column(String, index=True)
-    description = Column(String, index=True)
-    owner_id = Column(Integer, ForeignKey("users.id"))
+#     title = Column(String, index=True)
+#     description = Column(String, index=True)
+#     owner_id = Column(Integer, ForeignKey("users.id"))
 
-    owner = relationship("User", back_populates="items")
+#     owner = relationship("User", back_populates="items")
 
 class FurnitureModel(Base):
     __tablename__ = "FurnitureModel"
@@ -40,8 +38,11 @@ class FurnitureModel(Base):
     furn_model_name = Column(String,unique=True)
     characteristics = Column(String)
     price = Column(Float,nullable=False)
-    # def __repr__(self):
-    #     return f"<{type(self).__name__}(id={self.furn_model})>"
+    def to_dict(self) -> dict:
+        return {'furn_model':self.furn_model,
+            'furn_model_name':self.furn_model_name,
+            'characteristics':self.characteristics,
+            'price':self.price}
 
 class KA(Base):
     __tablename__ = "KA"
@@ -50,8 +51,11 @@ class KA(Base):
     name = Column(String)
     adress = Column(String)
     phone = Column(String)
-    def __repr__(self):
-        return f"<{type(self).__name__}(id={self.id_ka})>"
+    def to_dict(self) -> dict:
+        return {'id_KA':self.id_ka,
+            'name':self.name,
+            'adress':self.adress,
+            'phone_number':self.phone}
 
 class Doc_payment(Base):
     __tablename__ = "DocPayment"
@@ -60,8 +64,11 @@ class Doc_payment(Base):
     id_KA = Column(Integer,ForeignKey("KA.id_ka"),nullable=False)
     date_create = Column(DateTime)
     date = Column(DateTime)
-    def __repr__(self):
-        return f"<{type(self).__name__}(id={self.doc_num})>"
+    def to_dict(self) -> dict:
+        return {'doc_num':self.doc_num,
+            'id_KA':self.id_KA,
+            'date_create':self.date_create,
+            'date':self.date}
 
 class Payment(Base):
     __tablename__ = "Payment"
@@ -71,5 +78,9 @@ class Payment(Base):
     furn_model = Column(String,ForeignKey("FurnitureModel.furn_model"),nullable=False)
     furn_name = Column(String)
     amount = Column(Integer,nullable=False)
-    def __repr__(self):
-        return f"<{type(self).__name__}>"
+    def to_dict(self) -> dict:
+        return {'id_payment':self.id_payment,
+            'doc_num':self.doc_num,
+            'furn_model':self.furn_model,
+            'furn_name':self.furn_name,
+            'amount':self.amount}

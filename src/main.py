@@ -15,6 +15,26 @@ app = FastAPI()
 if __name__ == '__main__':
     uvicorn.run(app,host='0.0.0.0', port=8000)
 
+
+tags_metadata = [
+    {
+        "name": "FurnitureModel",
+        "description": "Работа с **FurnitureModel**",
+    },
+    {
+        "name": "KA",
+        "description": "Работа с **КА**",
+    },
+    {
+        "name": "DocPayment",
+        "description": "Работа с **DocPayment**",
+    },
+    {
+        "name": "Payment",
+        "description": "Работа с **Payment**",
+    },
+]
+
 # dba = SessionLocal()
 # item = crud.get_furniture_model(dba,"Ст-6")
 # print(item.price)
@@ -32,7 +52,17 @@ def get_db():
     finally:
         db.close()
 
-@app.post("/FurnitureModel/", response_model=schemas.FurnModel)
+def res_to_lis(res):
+    res2 = []
+    for item in res:
+        res2.append(item.to_dict())
+    return res2
+
+# +==============+
+# |    CREATE    |
+# +==============+
+
+@app.post("/FurnitureModel/Create/", response_model=schemas.FurnModel,tags = ['FurnitureModel'])
 def create_furniture_model(fm: schemas.FurnModel,db:AsyncSession = Depends(get_db)):
     """
     Создание новой модели мебели
@@ -40,13 +70,11 @@ def create_furniture_model(fm: schemas.FurnModel,db:AsyncSession = Depends(get_d
     fur_model = crud.get_furniture_model(db,fm.furn_model)
     if fur_model:
         print(fur_model.price)
-        raise HTTPException(status_code=400,detail='furniture model already exists')
-    created_FM = crud.create_furniture_model(db=db,fm=fm)
-    print(created_FM)
-    return {'res':created_FM}
+        raise HTTPException(status_code=400,detail='furniture model already exists') 
+    return crud.create_furniture_model(db=db,fm=fm)
 
 
-@app.post("/KA/",response_model=schemas.KA)
+@app.post("/KA/Create/",response_model=schemas.KA,tags = ['KA'])
 def create_KA(ka:schemas.KA, db:AsyncSession = Depends(get_db)):
     """
     Создание нового КА
@@ -56,7 +84,7 @@ def create_KA(ka:schemas.KA, db:AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=400,detail='KA already exists')
     return crud.create_KA(db,ka)
 
-@app.post("/doc_payment/",response_model=schemas.Doc_payment)
+@app.post("/DocPayment/Create/",response_model=schemas.Doc_payment,tags = ['DocPayment'])
 def create_doc_payment(dp:schemas.Doc_payment,db:AsyncSession = Depends(get_db)):
     """
     Создание нового документа оплаты
@@ -66,68 +94,96 @@ def create_doc_payment(dp:schemas.Doc_payment,db:AsyncSession = Depends(get_db))
         raise HTTPException(status_code=400,detail='payment document already exists')
     return crud.create_doc_pay(db,dp)
 
-@app.post("/payment/",response_model=schemas.payment)
+@app.post("/Payment/Create/",response_model=schemas.payment,tags = ['Payment'])
 def create_payment(pay:schemas.payment,db:AsyncSession = Depends(get_db)):
     """
     Создание новой оплаты
     """
     pa = crud.get_payment(db,pay.id_payment)
     if pa: raise HTTPException(status_code=400,detail='payment already exists')
+    doc = crud.get_doc(db,pay.doc_num)
+    if not doc: raise HTTPException(status_code=400,detail='have no doc by this num')
+    model = crud.get_furniture_model(db,pay.furn_model)
+    if not model: raise HTTPException(status_code=400,detail='have no model by this num')
     return crud.create_payment(db,pay)
 
-@app.get("/FurnitureModel/", response_model=schemas.FurnModel)
+# +==============+
+# |     READ     |
+# +==============+
+
+@app.get("/FurnitureModel/ReadByModel/", response_model=schemas.FurnModel,tags = ['FurnitureModel'])
 def read_furniture_model(furn_model:str = '',db:AsyncSession = Depends(get_db)):
     """
     Получить модель мебели
     """
-    fm = crud.get_furniture_model(db,furn_model)
-    return fm
+    return crud.get_furniture_model(db,furn_model)
 
-# @app.post("/users/", response_model=schemas.User)
-# def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-#     """
-#     Создание пользователя, если такой email уже есть в БД, то выдается ошибка
-#     """
-#     db_user = crud.get_user_by_email(db, email=user.email)
-#     if db_user:
-#         raise HTTPException(status_code=400, detail="Email already registered")
-#     return crud.create_user(db=db, user=user)
+@app.get('/FurnitureModel/ReadAll/', response_model=List[schemas.FurnModel],tags = ['FurnitureModel'])
+def read_all_furniture_models(skip: int = 0, limit: int = 100, db:AsyncSession = Depends(get_db)):
+    """
+    Получить список всех моделей мебели со скипом первых и указанным лимитом
+    """
+    return res_to_lis(crud.get_all_furniture_models(db,skip,limit))
 
+@app.get('/KA/ReadByID/',response_model=schemas.KA, tags=['KA'])
+def read_KA_by_id(id_KA:int = 0,db:AsyncSession = Depends(get_db)):
+    """
+    получить КА по его ИД
+    """
+    return crud.get_KA(db,id_KA)
 
-# @app.get("/users/", response_model=List[schemas.User])
-# def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     """
-#     Получение списка пользователей
-#     """
-#     users = crud.get_users(db, skip=skip, limit=limit)
-#     return users
+@app.get('/KA/ReadAll/', response_model=List[schemas.KA],tags = ['KA'])
+def read_all_KA(skip: int = 0, limit: int = 100, db:AsyncSession = Depends(get_db)):
+    """
+    Получить список всех KA со скипом первых и указанным лимитом
+    """
+    return res_to_lis(crud.get_all_KA(db,skip,limit))
 
+@app.get('/DocPayment/ReadByNum/',response_model=schemas.Doc_payment,tags = ['DocPayment'])
+def read_doc_payment_by_num(doc_num:str = '1', db:AsyncSession = Depends(get_db)):
+    """
+    Получить документ оплаты по его номеру
+    """
+    return crud.get_doc(db,doc_num)
 
-# @app.get("/users/{user_id}", response_model=schemas.User)
-# def read_user(user_id: int, db: Session = Depends(get_db)):
-#     """
-#     Получение пользователя по id, если такого id нет, то выдается ошибка
-#     """
-#     db_user = crud.get_user(db, user_id=user_id)
-#     if db_user is None:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     return db_user
+@app.get('/DocPayment/ReadByKA/',response_model=List[schemas.Doc_payment],tags = ['DocPayment'])
+def read_doc_payment_by_KA(id_KA:int = 0, db:AsyncSession = Depends(get_db)):
+    """
+    Получить документы оплаты у КА
+    """
+    return res_to_lis(crud.get_docs_by_KA(db,id_KA))
 
+@app.get('/DocPayment/ReadAll/',response_model=List[schemas.Doc_payment],tags = ['DocPayment'])
+def read_all_doc_payment(skip: int = 0, limit: int = 100, db:AsyncSession = Depends(get_db)):
+    """
+    Получить все документы оплаты
+    """
+    return res_to_lis(crud.get_all_docs(db,skip,limit))
 
-# @app.post("/users/{user_id}/items/", response_model=schemas.Item)
-# def create_item_for_user(
-#     user_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)
-# ):
-#     """
-#     Добавление пользователю нового предмета
-#     """
-#     return crud.create_user_item(db=db, item=item, user_id=user_id)
+@app.get('/Payment/ReadPayment/',response_model=schemas.payment,tags=['Payment'])
+def read_payment_by_id(id_pay:int = 0, db:AsyncSession = Depends(get_db)):
+    """
+    Получить оплатe по её номеру
+    """
+    return crud.get_payment(db,id_pay)
 
+@app.get('/Payment/ReadByDoc/',response_model=List[schemas.payment],tags=['Payment'])
+def read_payment_by_dock_num(doc_num:int = 0, db:AsyncSession = Depends(get_db)):
+    """
+    Получить оплаты по их номеру договора
+    """
+    return res_to_lis(crud.get_payments_by_doc_num(db,doc_num))
 
-# @app.get("/items/", response_model=List[schemas.Item])
-# def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     """
-#     Получение списка предметов
-#     """
-#     items = crud.get_items(db, skip=skip, limit=limit)
-#     return items
+@app.get('/Payment/ReadByFurnitureModel/',response_model=List[schemas.payment],tags=['Payment'])
+def read_payment_by_furn_model(model:str = 'Ст-1', db:AsyncSession = Depends(get_db)):
+    """
+    Получить оплаты по моделе мебели
+    """
+    return res_to_lis(crud.get_payments_by_furniture_model(db,model))
+
+@app.get('/Payment/ReadAll/',response_model=List[schemas.payment],tags=['Payment'])
+def read_all_payment(skip: int = 0, limit: int = 100, db:AsyncSession = Depends(get_db)):
+    """
+    Получить все оплаты
+    """
+    return res_to_lis(crud.get_payments(db,skip,limit))

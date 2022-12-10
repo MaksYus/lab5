@@ -29,7 +29,7 @@ def create_KA(db: Session,ka:schemas.KA):
     Добавление нового кнтрагента/покупателя
     """
     kontrA = models.KA(id_ka=ka.id_KA, name=ka.name, adress=ka.adress, phone=ka.phone_number)
-    return acr(db,kontrA)
+    return acr(db,kontrA).to_dict()
 
 def create_furniture_model(db:Session,fm:schemas.FurnModel):
     """
@@ -38,7 +38,7 @@ def create_furniture_model(db:Session,fm:schemas.FurnModel):
     fur_model = models.FurnitureModel(furn_model = fm.furn_model, furn_model_name = fm.furn_model_name, 
     characteristics = fm.characteristics, price = fm.price)
     fur_model = acr(db,fur_model)
-    return fur_model
+    return fur_model.to_dict()
 
 def create_doc_pay(db:Session,dp:schemas.Doc_payment):
     """
@@ -46,7 +46,7 @@ def create_doc_pay(db:Session,dp:schemas.Doc_payment):
     """
     doc_pay = models.Doc_payment(doc_num = dp.doc_num, id_KA = dp.id_KA, date_create = dp.date_create, 
     date = dp.date)
-    return acr(db,doc_pay)
+    return acr(db,doc_pay).to_dict()
 
 def create_payment(db:Session, pa:schemas.payment):
     """
@@ -54,7 +54,7 @@ def create_payment(db:Session, pa:schemas.payment):
     """
     pay = models.Payment(doc_num = pa.doc_num, furn_model = pa.furn_model,
     furn_name = pa.furn_name, amount = pa.amount)
-    return acr(pay)
+    return acr(db,pay).to_dict()
 
 def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
     """
@@ -70,6 +70,11 @@ def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
 #  |        GET        |
 #  +===================+
 
+def get_f(item):
+    if item :
+        return item.to_dict()
+    else: return {}
+
 # def get(db:Session):
 #     """
     
@@ -80,7 +85,7 @@ def get_payment(db:Session,id_payment:int = 0):
     """
     получить оплату по её ид
     """
-    return db.query(models.Payment).filter(models.Payment.id_payment == id_payment).first()
+    return get_f(db.query(models.Payment).filter(models.Payment.id_payment == id_payment).first())
 
 def get_payments_by_doc_num(db:Session, doc_num:int = 0):
     """
@@ -110,7 +115,7 @@ def get_doc(db:Session, doc_num:str = ''):
     """
     Получить документ по его номеру
     """
-    return db.query(models.Doc_payment).filter(models.Doc_payment.doc_num == doc_num).first()
+    return get_f(db.query(models.Doc_payment).filter(models.Doc_payment.doc_num == doc_num).first())
 
 def get_docs_by_KA(db:Session, id_ka:int = 0):
     """
@@ -128,7 +133,7 @@ def get_KA(db:Session,id_ka:int = 0):
     """
     Получить КА по его ИД
     """
-    return db.query(models.KA).filter(models.KA.id_ka == id_ka).first()
+    return get_f(db.query(models.KA).filter(models.KA.id_ka == id_ka).first())
 
 def get_all_KA(db:Session,skip: int = 0, limit: int = 100):
     """
@@ -140,7 +145,7 @@ def get_furniture_model(db:Session, furn_model:str = ''):
     """
     Получить модель мебели  
     """
-    return db.query(models.FurnitureModel).filter(models.FurnitureModel.furn_model == furn_model).first()
+    return get_f(db.query(models.FurnitureModel).filter(models.FurnitureModel.furn_model == furn_model).first())
 
 def get_all_furniture_models(db:Session,skip: int = 0, limit: int = 100):
     """
@@ -152,14 +157,14 @@ def get_user(db: Session, user_id: int):
     """
     Получить пользователя по его id
     """
-    return db.query(models.User).filter(models.User.id == user_id).first()
+    return get_f( db.query(models.User).filter(models.User.id == user_id).first())
 
 
 def get_user_by_email(db: Session, email: str):
     """
     Получить пользователя по его email
     """
-    return db.query(models.User).filter(models.User.email == email).first()
+    return get_f(db.query(models.User).filter(models.User.email == email).first())
 
 
 def get_items(db: Session, skip: int = 0, limit: int = 100):
