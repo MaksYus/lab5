@@ -183,3 +183,23 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     limit - маскимальное количество записей
     """
     return db.query(models.User).offset(skip).limit(limit).all()
+
+# +==========+
+# |  UPDATE  |
+# +==========+
+
+def update_doc_payment(db:Session,dp:schemas.Doc_payment):
+    """
+    Обновление документа оплаты
+    """
+    doc_pay = models.Doc_payment(doc_num = dp.doc_num, id_KA = dp.id_KA, date_create = dp.date_create, 
+    date = dp.date)
+    text = f"""
+    UPDATE DocPayment
+    SET id_KA = {dp.id_KA}, date_create = {dp.date_create}, date = {dp.date}
+    WHERE doc_num = {dp.doc_num}
+    """
+    with db.connection() as con:
+        res = con.execute(text)
+    return res 
+    

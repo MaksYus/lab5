@@ -1,1 +1,7 @@
 /3LabVenv/
+/.pytest_cache/
+/migrations/__pycache__/
+/src/__pycache__/
+Furniture_Shop.db
+sqlite_base.db
+test.db

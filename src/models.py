@@ -10,7 +10,7 @@ class BaseModel(Base):
     __abstract__ = True
 
     def __repr__(self):
-        return f"<{type(self).__name__}(id={self.id})>"
+        return f"<{type(self).__name__}(id={self.id})>" # pragma: no cover
 
 # class User(BaseModel):
 #     __tablename__ = "users"
@@ -42,7 +42,7 @@ class FurnitureModel(Base):
         return {'furn_model':self.furn_model,
             'furn_model_name':self.furn_model_name,
             'characteristics':self.characteristics,
-            'price':self.price}
+            'price':self.price} # pragma: no cover
 
 class KA(Base):
     __tablename__ = "KA"
@@ -55,7 +55,7 @@ class KA(Base):
         return {'id_KA':self.id_ka,
             'name':self.name,
             'adress':self.adress,
-            'phone_number':self.phone}
+            'phone_number':self.phone} # pragma: no cover
 
 class Doc_payment(Base):
     __tablename__ = "DocPayment"
@@ -68,7 +68,7 @@ class Doc_payment(Base):
         return {'doc_num':self.doc_num,
             'id_KA':self.id_KA,
             'date_create':self.date_create,
-            'date':self.date}
+            'date':self.date} # pragma: no cover
 
 class Payment(Base):
     __tablename__ = "Payment"
@@ -83,4 +83,4 @@ class Payment(Base):
             'doc_num':self.doc_num,
             'furn_model':self.furn_model,
             'furn_name':self.furn_name,
-            'amount':self.amount}
+            'amount':self.amount} # pragma: no cover
