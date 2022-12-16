@@ -13,7 +13,7 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 if __name__ == '__main__':
-    uvicorn.run(app,host='0.0.0.0', port=8000)
+    uvicorn.run(app,host='0.0.0.0', port=8000) # pragma: no cover
 
 
 tags_metadata = [
@@ -41,7 +41,7 @@ tags_metadata = [
 # dba.close()
 
 # Dependency
-def get_db():
+def get_db():# pragma: no cover
     """
     Задаем зависимость к БД. При каждом запросе будет создаваться новое
     подключение.
@@ -69,7 +69,6 @@ def create_furniture_model(fm: schemas.FurnModel,db:AsyncSession = Depends(get_d
     """
     fur_model = crud.get_furniture_model(db,fm.furn_model)
     if fur_model:
-        print(fur_model.price)
         raise HTTPException(status_code=400,detail='furniture model already exists') 
     return crud.create_furniture_model(db=db,fm=fm)
 
@@ -78,7 +77,9 @@ def read_furniture_model(furn_model:str = '',db:AsyncSession = Depends(get_db)):
     """
     Получить модель мебели
     """
-    return crud.get_furniture_model(db,furn_model)
+    fm = crud.get_furniture_model(db,furn_model)
+    if len(fm) == 0: raise HTTPException(status_code=400,detail='furniture model not found') 
+    return fm
 
 @app.get('/FurnitureModel/ReadAll/', response_model=List[schemas.FurnModel],tags = ['FurnitureModel'])
 def read_all_furniture_models(skip: int = 0, limit: int = 100, db:AsyncSession = Depends(get_db)):
@@ -112,7 +113,7 @@ def add_doc_payment_to_ka(id_ka:int, dp:schemas.Doc_payment,db:AsyncSession = De
     if dp.id_KA != id_ka:
         raise HTTPException(status_code=400,detail='номер КА принимающего не равен номеру КА в документе оплаты')
     doc_pay = crud.get_doc(db,dp.doc_num)
-    if doc_pay:
+    if doc_pay:# pragma: no cover
         crud.update_doc_payment(db,dp)
         return dp
     else: return crud.create_doc_pay(db,dp)
@@ -146,9 +147,6 @@ def create_doc_payment(dp:schemas.Doc_payment,db:AsyncSession = Depends(get_db))
     doc_pay = crud.get_doc(db,dp.doc_num)
     if doc_pay:
         raise HTTPException(status_code=400,detail='payment document already exists')
-    pay = crud.get_payments_by_doc_num(db,dp.doc_num)
-    if not pay:
-        raise HTTPException(status_code=400,detail='эта оплата не существует')
     ka = crud.get_KA(db,dp.id_KA)
     if not ka:
         raise HTTPException(status_code=400,detail='этого КА не существует')
@@ -159,14 +157,18 @@ def read_doc_payment_by_num(doc_num:str = '1', db:AsyncSession = Depends(get_db)
     """
     Получить документ оплаты по его номеру
     """
-    return crud.get_doc(db,doc_num)
+    dp = crud.get_doc(db,doc_num)
+    if len(dp) == 0 : raise HTTPException(status_code=400,detail='dp not exist')
+    return dp
 
 @app.get('/DocPayment/ReadByKA/',response_model=List[schemas.Doc_payment],tags = ['DocPayment'])
 def read_doc_payment_by_KA(id_KA:int = 0, db:AsyncSession = Depends(get_db)):
     """
     Получить документы оплаты у КА
     """
-    return res_to_lis(crud.get_docs_by_KA(db,id_KA))
+    dpl = res_to_lis(crud.get_docs_by_KA(db,id_KA))
+    if len(dpl) == 0: raise HTTPException(status_code=400,detail='dp not exist')
+    return dpl
 
 @app.get('/DocPayment/ReadAll/',response_model=List[schemas.Doc_payment],tags = ['DocPayment'])
 def read_all_doc_payment(skip: int = 0, limit: int = 100, db:AsyncSession = Depends(get_db)):
