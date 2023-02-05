@@ -64,6 +64,15 @@ def test_fm_get_all_NONE():
     data = response.json()
     assert len(data) == 0
 
+def test_pay_get_all_neg():
+    """
+    Проверка на получение всех payment - УСПЕХ
+    """
+    response = client.get("/Payment/ReadAll/")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert len(data) == 0
+
 # +========+
 # |   KA   |
 # +========+
@@ -79,7 +88,10 @@ def test_create_KA():
     )
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data["id_KA"] == 123
     assert data["name"] == "петя"
+    assert data["adress"] == "ул.пушкниа"
+    assert data["phone_number"] == "9999"
 
 
 def test_create_exist_KA():
@@ -103,7 +115,10 @@ def test_get_all_KA():
     response = client.get("/KA/ReadAll/")
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data[0]["id_KA"] == 123
     assert data[0]["name"] == "петя"
+    assert data[0]["adress"] == "ул.пушкниа"
+    assert data[0]["phone_number"] == "9999"
 
 
 def test_get_KA_by_id():
@@ -113,7 +128,10 @@ def test_get_KA_by_id():
     response = client.get("/KA/ReadByID/?id_KA=123")
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data["id_KA"] == 123
     assert data["name"] == "петя"
+    assert data["adress"] == "ул.пушкниа"
+    assert data["phone_number"] == "9999"
 
 
 def test_KA_not_found():
@@ -178,6 +196,7 @@ def test_create_DP():
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["id_KA"] == 123
+
 
 def test_create_DP_NEG():
     """
@@ -263,6 +282,9 @@ def test_create_FM():
     )
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data["furn_model_name"] == "fm1"
+    assert data["furn_model"] == "fm-1"
+    assert data["characteristics"] == "ch"
     assert data["price"] == 1
 
 def test_create_FM_NEG():
@@ -284,6 +306,9 @@ def test_fm_get():
     response = client.get("/FurnitureModel/ReadByModel/?furn_model=fm-1")
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data["furn_model_name"] == "fm1"
+    assert data["furn_model"] == "fm-1"
+    assert data["characteristics"] == "ch"
     assert data["price"] == 1
 
 def test_fm_not_found():
@@ -302,4 +327,139 @@ def test_fm_get_all():
     response = client.get("/FurnitureModel/ReadAll/?skip=0&limit=100")
     assert response.status_code == 200, response.text
     data = response.json()
+    assert data[0]["furn_model_name"] == "fm1"
+    assert data[0]["furn_model"] == "fm-1"
+    assert data[0]["characteristics"] == "ch"
     assert data[0]["price"] == 1
+
+
+# +=================+
+# |     PAYMENT     |
+# +=================+
+
+def test_create_pay_positive():
+    """
+    Тест на создание нового fpeyment УСПЕХ
+    """
+    response = client.post(
+        "/Payment/Create/",
+        json={"id_payment": 1, "doc_num": 1, "furn_name":"string","furn_model":"fm-1","amount":1}
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["amount"] == 1
+    assert data["id_payment"] == 1
+    assert data["doc_num"] == 1
+    assert data["furn_model"] == "fm-1"
+
+def test_create_pay_negative_1():
+    """
+    Тест на создание нового fpeyment провал
+    """
+    response = client.post(
+        "/Payment/Create/",
+        json={"id_payment": 1, "doc_num": 1, "furn_name":"string","furn_model":"fm-1","amount":1}
+    )
+    assert response.status_code == 400, response.text
+    data = response.json()
+    assert data["detail"] == "payment already exists"
+
+def test_create_pay_negative_2():
+    """
+    Тест на создание нового fpeyment провал
+    """
+    response = client.post(
+        "/Payment/Create/",
+        json={"id_payment": 2, "doc_num": 999, "furn_name":"string","furn_model":"fm-1","amount":1}
+    )
+    assert response.status_code == 400, response.text
+    data = response.json()
+    assert data["detail"] == "have no doc by this num"
+
+def test_create_pay_negative_3():
+    """
+    Тест на создание нового fpeyment провал
+    """
+    response = client.post(
+        "/Payment/Create/",
+        json={"id_payment": 2, "doc_num": 1, "furn_name":"string","furn_model":"kjbjnjnjnj","amount":1}
+    )
+    assert response.status_code == 400, response.text
+    data = response.json()
+    assert data["detail"] == "have no model by this num"
+
+def test_pay_get_all():
+    """
+    Проверка на получение всех payment - УСПЕХ
+    """
+    response = client.get("/Payment/ReadAll/")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data[0]["amount"] == 1
+    assert data[0]["id_payment"] == 1
+    assert data[0]["doc_num"] == 1
+    assert data[0]["furn_model"] == "fm-1"
+
+def test_pay_get_id():
+    """
+    Проверка на получение payment by id - УСПЕХ
+    """
+    response = client.get("/Payment/ReadPayment/?id_pay=1")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["id_payment"] == 1
+    assert data["doc_num"] == 1
+    assert data["furn_model"] == "fm-1"
+    assert data["amount"] == 1
+
+def test_pay_get_id_neg():
+    """
+    Проверка на получение payment by id - negative
+    """
+    response = client.get("/Payment/ReadPayment/?id_pay=99")
+    assert response.status_code == 400, response.text
+    data = response.json()
+    assert data["detail"] == 'no pay by this id'
+
+def test_pay_get_doc():
+    """
+    Проверка на получение payment by id - УСПЕХ
+    """
+    response = client.get("/Payment/ReadByDoc/?doc_num=1")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data[0]["id_payment"] == 1
+    assert data[0]["doc_num"] == 1
+    assert data[0]["furn_model"] == "fm-1"
+    assert data[0]["amount"] == 1
+
+def test_pay_get_doc_neg():
+    """
+    Проверка на получение payment by id - negative
+    """
+    response = client.get("/Payment/ReadByDoc/?doc_num=99")
+    assert response.status_code == 400, response.text
+    data = response.json()
+    assert data["detail"] == 'hove no pay by this doc'
+
+def test_pay_get_fm():
+    """
+    Проверка на получение payment by id - УСПЕХ
+    """
+    response = client.get("/Payment/ReadByFurnitureModel/?model=fm-1")
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data[0]["id_payment"] == 1
+    assert data[0]["doc_num"] == 1
+    assert data[0]["furn_model"] == "fm-1"
+    assert data[0]["amount"] == 1
+
+def test_pay_get_fm_neg():
+    """
+    Проверка на получение payment by id - negative
+    """
+    response = client.get("/Payment/ReadByFurnitureModel/?furn_model=fm-1")
+    assert response.status_code == 400, response.text
+    data = response.json()
+    assert data["detail"] == 'no pay by this model'
+

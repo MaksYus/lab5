@@ -199,21 +199,27 @@ def read_payment_by_id(id_pay:int = 0, db:AsyncSession = Depends(get_db)):
     """
     Получить оплатe по её номеру
     """
-    return crud.get_payment(db,id_pay)
+    pay = crud.get_payment(db,id_pay)
+    if len(pay) == 0: raise HTTPException(400,'no pay by this id')
+    return pay
 
 @app.get('/Payment/ReadByDoc/',response_model=List[schemas.payment],tags=['Payment'])
 def read_payment_by_dock_num(doc_num:int = 0, db:AsyncSession = Depends(get_db)):
     """
     Получить оплаты по их номеру договора
     """
-    return res_to_lis(crud.get_payments_by_doc_num(db,doc_num))
+    plis = res_to_lis(crud.get_payments_by_doc_num(db,doc_num))
+    if len(plis) == 0: raise HTTPException(400,'hove no pay by this doc')
+    return plis
 
 @app.get('/Payment/ReadByFurnitureModel/',response_model=List[schemas.payment],tags=['Payment'])
 def read_payment_by_furn_model(model:str = 'Ст-1', db:AsyncSession = Depends(get_db)):
     """
     Получить оплаты по моделе мебели
     """
-    return res_to_lis(crud.get_payments_by_furniture_model(db,model))
+    fmlis = res_to_lis(crud.get_payments_by_furniture_model(db,model))
+    if len(fmlis) == 0: raise HTTPException(400,'no pay by this model')
+    return fmlis
 
 @app.get('/Payment/ReadAll/',response_model=List[schemas.payment],tags=['Payment'])
 def read_all_payment(skip: int = 0, limit: int = 100, db:AsyncSession = Depends(get_db)):
