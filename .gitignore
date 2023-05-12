@@ -4,6 +4,5 @@
 /src/__pycache__/
 Furniture_Shop.db
 sqlite_base.db
-test.db
 .env
 /venv/
