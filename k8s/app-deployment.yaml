@@ -16,7 +16,7 @@ spec:                     # Описываем характеристики depl
     spec:
       containers:         # Описываем контейнер
       - name: fastapi
-        image: maksikoz/fastapi:latest
+        image: maksikoz/fastapi:1.0
         ports:
         - containerPort: 8000
         env:              # Задаем переменные окружения
